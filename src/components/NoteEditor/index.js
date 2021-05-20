@@ -1,6 +1,7 @@
 import "./index.css";
 import textReadability from "text-readability";
 import * as featureFlags from "../../utils/featureFlags";
+import { useEffect, useMemo, useRef } from "react";
 
 function calculateReadingScore(textList) {
   const scoreSum = textList
@@ -13,16 +14,19 @@ function calculateReadingScore(textList) {
 const NoteEditor = ({ notes, activeNoteId, saveNote }) => {
   const currentNoteText = notes[activeNoteId].text;
 
-  const currentReadingScore = featureFlags.readingStatsEnabled
-    ? calculateReadingScore([currentNoteText])
-    : 0;
-  const othersReadingScore = featureFlags.readingStatsEnabled
-    ? calculateReadingScore(
-        Object.values(notes)
-          .filter((note) => note.id !== activeNoteId)
-          .map((i) => i.text)
-      )
-    : 0;
+  const currentReadingScore = useMemo(() => {
+    return calculateReadingScore([currentNoteText]);
+  }, [currentNoteText]);
+
+  const noteTexts = Object.values(notes)
+    .filter((note) => note.id !== activeNoteId)
+    .map((i) => i.text);
+
+  const othersReadingScore = useMemo(() => {
+    return calculateReadingScore(noteTexts);
+  }, [JSON.stringify(noteTexts)]);
+
+  useWhyDidYouUpdate("NoteEditor", { currentNoteText, notes, activeNoteId });
 
   return (
     <div className="note-editor">
@@ -66,3 +70,34 @@ const NoteEditor = ({ notes, activeNoteId, saveNote }) => {
 };
 
 export default NoteEditor;
+
+function useWhyDidYouUpdate(name, props) {
+  // Get a mutable ref object where we can store props ...
+  // ... for comparison next time this hook runs.
+  const previousProps = useRef();
+  useEffect(() => {
+    if (previousProps.current) {
+      // Get all keys from previous and current props
+      const allKeys = Object.keys({ ...previousProps.current, ...props });
+      // Use this object to keep track of changed props
+      const changesObj = {};
+      // Iterate through keys
+      allKeys.forEach((key) => {
+        // If previous is different from current
+        if (previousProps.current[key] !== props[key]) {
+          // Add to changesObj
+          changesObj[key] = {
+            from: previousProps.current[key],
+            to: props[key],
+          };
+        }
+      });
+      // If changesObj not empty then output to console
+      if (Object.keys(changesObj).length) {
+        console.log("[why-did-you-update]", name, changesObj);
+      }
+    }
+    // Finally update previousProps with current props for next hook call
+    previousProps.current = props;
+  });
+}

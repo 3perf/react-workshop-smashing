@@ -1,1 +1,1 @@
-export const readingStatsEnabled = false;
+export const readingStatsEnabled = true;

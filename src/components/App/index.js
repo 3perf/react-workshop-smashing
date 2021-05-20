@@ -70,6 +70,14 @@ function AppPrimaryPane({ activeNoteId, notes, saveNote }) {
   }
 }
 
+/*
+
+[App                         ][NoteList × 1 ms][AppPrimaryPane][Child 1 × 10 ms][Child 2 × 10 ms]
+[getNotes][useState][useState]
+
+
+*/
+
 function App() {
   const [notes, setNotes] = useState(getNotes());
 
@@ -136,7 +144,7 @@ function App() {
     setActiveNoteId(null);
   };
 
-  return (
+  const children = (
     <div className="notes">
       <div className="notes__column notes__column_list">
         <h1 className="notes__column-header">NoteList</h1>
@@ -157,6 +165,15 @@ function App() {
       />
     </div>
   );
+
+  console.log(children);
+
+  return children;
+
+  /*
+
+  { }
+  */
 }
 
 export default App;

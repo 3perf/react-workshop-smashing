@@ -1,6 +1,6 @@
 import "./index.css";
 import ReactMarkdown from "react-markdown";
-import { useState } from "react";
+import { useState, memo } from "react";
 import gfm from "remark-gfm";
 import { format } from "date-fns";
 
@@ -21,24 +21,37 @@ function generateNoteHeader(text) {
   );
 }
 
-const NoteButton = ({ isActive, onNoteActivated, text, date }) => {
-  const className = [
-    "notes-list__button",
-    "notes-list__note",
-    isActive && "notes-list__note_active",
-  ]
-    .filter((i) => i !== false)
-    .join(" ");
+/*
+memo(function Component({ user}) {
 
-  return (
-    <button className={className} onClick={onNoteActivated}>
-      <span className="notes-list__note-meta">
-        {format(date, "d MMM yyyy HH:mm:ss")}
-      </span>
-      {generateNoteHeader(text)}
-    </button>
-  );
-};
+})
+
+<Component userId={userId} avatar={userAvatar} />
+*/
+
+const NoteButtonMemoized = memo(
+  function NoteButton({ isActive, onNoteActivated, text, date }) {
+    const className = [
+      "notes-list__button",
+      "notes-list__note",
+      isActive && "notes-list__note_active",
+    ]
+      .filter((i) => i !== false)
+      .join(" ");
+
+    return (
+      <button className={className} onClick={onNoteActivated}>
+        <span className="notes-list__note-meta">
+          {format(date, "d MMM yyyy HH:mm:ss")}
+        </span>
+        {generateNoteHeader(text)}
+      </button>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.text === nextProps.text /* && ... date */
+);
 
 export default function NotesList({
   notes,
@@ -74,8 +87,9 @@ export default function NotesList({
             return text.toLowerCase().includes(filter.toLowerCase());
           })
           .map(({ id, text, date }) => (
-            <NoteButton
+            <NoteButtonMemoized
               key={id}
+              id={id}
               isActive={activeNoteId === id}
               onNoteActivated={() => onNoteActivated(id)}
               text={text}
