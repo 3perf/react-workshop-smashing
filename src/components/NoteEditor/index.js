@@ -2,14 +2,27 @@ import "./index.css";
 import textReadability from "text-readability";
 import * as featureFlags from "../../utils/featureFlags";
 import { useEffect, useMemo, useRef } from "react";
+import _ from "lodash";
+
+const readScoreMemoized = _.memoize(textReadability.daleChallReadabilityScore);
+
+// daleChallReadabilityScore → window.allTextsCalledWith.push(text)
+
+// readScoreMemoized("text1"); // → invokes daleChallReadabilityScore('text1')
+// readScoreMemoized("text2"); // → invokes daleChallReadabilityScore('text2')
+// readScoreMemoized("text1"); // → NOT invoking daleChallReadabilityScore('text2'), returning the memoized value
 
 function calculateReadingScore(textList) {
   const scoreSum = textList
-    .map((i) => textReadability.daleChallReadabilityScore(i))
+    .map((i) => readScoreMemoized(i))
     .reduce((a, b) => a + b, 0);
   const averageScore = scoreSum / textList.length;
   return averageScore;
 }
+
+// memo = (Component) => (props) => {
+//   return useMemo(() => <Component {...props} />, [...Object.values(props)]);
+// };
 
 const NoteEditor = ({ notes, activeNoteId, saveNote }) => {
   const currentNoteText = notes[activeNoteId].text;

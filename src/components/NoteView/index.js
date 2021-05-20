@@ -1,5 +1,5 @@
 import "./index.css";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import gfm from "remark-gfm";
 
@@ -31,7 +31,12 @@ export default function NoteView({ text }) {
         className="note-view__view"
         style={{ fontSize: fontSize === "regular" ? null : fontSize }}
       >
-        <ReactMarkdown remarkPlugins={[gfm]}>{text}</ReactMarkdown>
+        {useMemo(
+          () => (
+            <ReactMarkdown remarkPlugins={[gfm]}>{text}</ReactMarkdown>
+          ),
+          [text]
+        )}
       </section>
     </div>
   );
