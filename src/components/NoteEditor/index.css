@@ -1,0 +1,59 @@
+.note-editor {
+}
+
+.note-editor__wrapper {
+  position: relative;
+}
+
+.note-editor__textarea {
+  display: block;
+  border: 1px solid #ccc;
+  padding: 6px 9px;
+  width: 100%;
+  min-height: 300px;
+  height: auto;
+  resize: vertical;
+}
+
+.note-editor__reading-scores {
+  margin-top: 16px;
+
+  background: #fffae0;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.note-editor__hint {
+  margin-top: 16px;
+
+  background: #fffae0;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.note-editor__hint > :first-child {
+  margin-top: 0;
+}
+
+.note-editor__hint > :last-child {
+  margin-bottom: 0;
+}
+
+.note-editor__popup {
+  position: absolute;
+  z-index: 1;
+  background: #fffae0;
+  width: fit-content;
+  padding: 6px 9px;
+}
+
+.note-editor__popup-hint {
+  margin-top: 4px;
+  font-size: small;
+}
+
+.CodeMirror {
+  border: 1px solid #ccc;
+}
