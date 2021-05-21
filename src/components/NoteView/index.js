@@ -1,6 +1,6 @@
 import "./index.css";
 import "highlight.js/styles/github.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import gfm from "remark-gfm";
 import hljs from "highlight.js";
@@ -13,15 +13,18 @@ function CodeWithHighlighting({ children, className }) {
   useEffect(() => {
     const codeTag = codeBlock.current.childNodes[0].childNodes[0];
     hljs.highlightElement(codeTag);
-  });
+  }, [codeContent, className]);
 
-  return (
-    <div
-      ref={codeBlock}
-      dangerouslySetInnerHTML={{
-        __html: `<pre class="${className}"><code>${codeContent}</code></pre>`,
-      }}
-    />
+  return useMemo(
+    () => (
+      <div
+        ref={codeBlock}
+        dangerouslySetInnerHTML={{
+          __html: `<pre class="${className}"><code>${codeContent}</code></pre>`,
+        }}
+      />
+    ),
+    [codeContent, className]
   );
 }
 
