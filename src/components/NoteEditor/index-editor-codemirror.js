@@ -8,7 +8,7 @@ class NoteEditor extends Component {
   popupRef = createRef();
   textareaRef = createRef();
   state = {
-    popupHeight: 0,
+    // popupHeight: 0,
     isCodeEditorFocused: false,
   };
 
@@ -23,9 +23,9 @@ class NoteEditor extends Component {
     });
     this.editor.setSize("100%", "300px");
 
-    this.setState({
-      popupHeight: this.popupRef.current?.clientHeight,
-    });
+    // this.setState({
+    //   popupHeight: this.popupRef.current?.clientHeight,
+    // });
 
     this.editor.on("focus", () => {
       this.setState({ isCodeEditorFocused: true });
@@ -36,12 +36,12 @@ class NoteEditor extends Component {
   }
 
   componentDidUpdate() {
-    const actualPopupHeight = this.popupRef.current?.clientHeight;
-    if (this.state.popupHeight !== actualPopupHeight) {
-      this.setState({
-        popupHeight: this.popupRef.current?.clientHeight,
-      });
-    }
+    // const actualPopupHeight = this.popupRef.current?.clientHeight;
+    // if (this.state.popupHeight !== actualPopupHeight) {
+    //   this.setState({
+    //     popupHeight: this.popupRef.current?.clientHeight,
+    //   });
+    // }
   }
 
   render() {
@@ -54,7 +54,9 @@ class NoteEditor extends Component {
             className="note-editor__popup"
             ref={this.popupRef}
             style={{
-              bottom: -this.state.popupHeight,
+              // bottom: -this.state.popupHeight,
+              bottom: 0,
+              transform: "translateY(100%)",
               visibility: this.state.isCodeEditorFocused ? "visible" : "hidden",
               pointerEvents: this.state.isCodeEditorFocused ? "auto" : "none",
             }}

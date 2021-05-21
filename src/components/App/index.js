@@ -1,7 +1,7 @@
 import "./index.css";
 import { useLayoutEffect, useState } from "react";
 import NotesList from "../NotesList";
-import NoteEditor from "../NoteEditor";
+import NoteEditor from "../NoteEditor/index-editor-codemirror";
 import NoteView from "../NoteView";
 import { nanoid } from "nanoid";
 import Jabber from "jabber";
