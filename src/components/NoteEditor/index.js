@@ -78,6 +78,7 @@ function Toolbar({ date, onDateChange }) {
 
 function ThemeSwitcher() {
   const { theme, setTheme } = useContext(ThemeContext);
+  console.log("ThemeSwitcher");
 
   return (
     <div className="note-editor__theme-switcher">
@@ -101,6 +102,8 @@ function ThemeSwitcher() {
 }
 
 const ThemeSwitcherMemo = memo(ThemeSwitcher);
+
+// ThemeSwitcherMemo.whyDidYouRender = true;
 
 function NoteEditor({ notes, activeNoteId, saveNote }) {
   const currentNote = notes[activeNoteId];

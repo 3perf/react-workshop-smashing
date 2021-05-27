@@ -13,6 +13,9 @@ export const updateLastActiveDate = createAction(
 
 const userReducer = (userData = [], action) => {
   if (action.type === updateLastActiveDate.toString()) {
+    // return immer.produce(userData, (draft) => {
+    //   draft[0].lastActiveDate = action.payload.dateString;
+    // });
     const [currentUser, ...otherUsers] = userData;
 
     return [

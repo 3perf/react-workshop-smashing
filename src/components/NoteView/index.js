@@ -3,6 +3,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import gfm from "remark-gfm";
 import { nanoid } from "nanoid";
+import { unstable_batchedUpdates } from "react-dom";
 
 const fakeApi = {
   changeReadStatus: () => new Promise((resolve) => setTimeout(resolve, 300)),
@@ -19,13 +20,13 @@ export default function NoteView({ text }) {
       <div className="note-view__control">
         <button
           onClick={() => {
-            fakeApi
-              .changeReadStatus()
-              .then(() => setIsRead((isRead) => !isRead));
-
-            fakeApi
-              .updateSyncStatus(lastSyncId)
-              .then((syncId) => setLastSyncId(syncId));
+            // Promise.all([
+            // fakeApi.changeReadStatus(),
+            fakeApi.updateSyncStatus(lastSyncId).then((_, syncId) => {
+              setIsRead((isRead) => !isRead);
+              setLastSyncId(syncId);
+              // });
+            });
           }}
         >
           {isRead ? "Mark as unread" : "Mark as read"}
@@ -38,3 +39,17 @@ export default function NoteView({ text }) {
     </div>
   );
 }
+
+/*
+componentDidMount() { / componentDidUpdate()
+  this.setState()
+}
+
+useLayoutEffect(() => {
+  setSomeState()
+})
+
+useEffect(() => {
+  setSomeState()
+})
+*/

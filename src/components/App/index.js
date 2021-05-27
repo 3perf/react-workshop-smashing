@@ -1,5 +1,5 @@
 import "./index.css";
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { Avatar, Tab, Tabs } from "@material-ui/core";
 import { AvatarGroup } from "@material-ui/lab";
 import NotesList from "../NotesList";
@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateLastActiveDate } from "../../store/userReducer";
 import { formatISO } from "date-fns/esm";
 import { ThemeContextProvider } from "../ThemeContext";
+import _ from "lodash";
 
 const jabber = new Jabber();
 
@@ -32,15 +33,26 @@ function ModeSwitcher({ mode, onModeSwitch }) {
   );
 }
 
-function Authors() {
-  const activeIn2021 = useSelector((state) =>
-    state.users.filter((i) => i.lastActiveDate.includes("2021"))
+// const activeIn2021Selector = createSelector(
+//   (state) => state.users,
+//   (state) => state.yearActive,
+//   (state) => state.something,
+//   (users, yearActive, something) => users.filter((i) => i.lastActiveDate.includes(yearActive))
+// );
+
+const Authors = memo(function Authors() {
+  const activeIn2021 = useSelector(
+    (state) =>
+      state.users.filter((i) => i.lastActiveDate.includes("2021")).length
+    // (prevSnapshot, nextSnapshot) => {
+    //   return _.isEqual(prevSnapshot, nextSnapshot);
+    // }
   );
 
   return (
     <div className="notes__authors">
       <div className="notes__authors-last-active">
-        {activeIn2021.length} authors active this year
+        {activeIn2021} authors active this year
       </div>
       <AvatarGroup max={4}>
         <Avatar src="/avatar1.jpg" />
@@ -51,7 +63,9 @@ function Authors() {
       </AvatarGroup>
     </div>
   );
-}
+});
+
+// (ThemeProvider) => (ThemeConsumer) => (AppState) =>
 
 function AppPrimaryPane({ activeNoteId, notes, saveNote }) {
   const [mode, setMode] = useState("edit");
@@ -112,59 +126,62 @@ function App() {
     dispatch(updateLastActiveDate(formatISO(new Date()).split("T")[0]));
   };
 
-  const createNewNotes = ({ count, paragraphs }) => {
-    for (let i = 0; i < count; i++) {
-      const noteId = nanoid();
+  const createNewNotes = useCallback(
+    ({ count, paragraphs }) => {
+      for (let i = 0; i < count; i++) {
+        const noteId = nanoid();
 
-      let noteText = jabber.createParagraph(6);
-      for (let j = 0; j < paragraphs; j++) {
-        let line = jabber.createParagraph(30);
+        let noteText = jabber.createParagraph(6);
+        for (let j = 0; j < paragraphs; j++) {
+          let line = jabber.createParagraph(30);
 
-        noteText += "\n\n" + line;
+          noteText += "\n\n" + line;
+        }
+
+        // Make random words bold or italic
+        noteText = noteText
+          .split("\n")
+          .map((line) =>
+            line
+              .split(" ")
+              .filter(Boolean)
+              .map((word) => {
+                if (Math.random() < 0.05) {
+                  return "**" + word + "**";
+                }
+
+                if (Math.random() < 0.05) {
+                  return "_" + word + "_";
+                }
+
+                return word;
+              })
+              .join(" ")
+          )
+          .join("\n");
+
+        putNote(noteId, { text: noteText });
       }
 
-      // Make random words bold or italic
-      noteText = noteText
-        .split("\n")
-        .map((line) =>
-          line
-            .split(" ")
-            .filter(Boolean)
-            .map((word) => {
-              if (Math.random() < 0.05) {
-                return "**" + word + "**";
-              }
+      const newNotes = getNotes();
+      setNotes(newNotes);
 
-              if (Math.random() < 0.05) {
-                return "_" + word + "_";
-              }
+      // For convenience, if only a single note was created, activate it
+      if (count === 1) {
+        const noteIds = Object.keys(newNotes);
+        setActiveNoteId(noteIds[noteIds.length - 1]);
+      }
+    },
+    [setNotes, setActiveNoteId]
+  );
 
-              return word;
-            })
-            .join(" ")
-        )
-        .join("\n");
-
-      putNote(noteId, { text: noteText });
-    }
-
-    const newNotes = getNotes();
-    setNotes(newNotes);
-
-    // For convenience, if only a single note was created, activate it
-    if (count === 1) {
-      const noteIds = Object.keys(newNotes);
-      setActiveNoteId(noteIds[noteIds.length - 1]);
-    }
-  };
-
-  const deleteAllNotes = () => {
+  const deleteAllNotes = useCallback(() => {
     deleteNotes();
 
     const newNotes = getNotes();
     setNotes(newNotes);
     setActiveNoteId(null);
-  };
+  }, [setNotes, setActiveNoteId]);
 
   return (
     <ThemeContextProvider>

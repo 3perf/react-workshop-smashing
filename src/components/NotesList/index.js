@@ -1,9 +1,11 @@
 import "./index.css";
 import ReactMarkdown from "react-markdown";
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import gfm from "remark-gfm";
 import { format } from "date-fns";
 import { Button, ButtonGroup, TextField } from "@material-ui/core";
+import { useRef } from "react";
+import { useEffect } from "react";
 
 function generateNoteHeader(text) {
   const firstLine = text
@@ -22,7 +24,7 @@ function generateNoteHeader(text) {
   );
 }
 
-function FilterInput({ filter, onChange, noteCount }) {
+const FilterInput = memo(function FilterInput({ filter, onChange, noteCount }) {
   return (
     <TextField
       className="notes-list__input"
@@ -32,7 +34,7 @@ function FilterInput({ filter, onChange, noteCount }) {
       placeholder={`Filter ${noteCount} note${noteCount === 1 ? "" : "s"}`}
     />
   );
-}
+});
 
 function NoteButton({ isActive, onNoteActivated, text, date }) {
   const className = [
@@ -59,6 +61,33 @@ function NoteButton({ isActive, onNoteActivated, text, date }) {
     </button>
   );
 }
+
+function NoteControls(props) {
+  useWhyDidYouUpdate("NoteControls", props);
+
+  const { onNewNotesRequested, onDeleteAllRequested } = props;
+
+  return (
+    <ButtonGroup size="small">
+      <Button onClick={() => onNewNotesRequested({ count: 1, paragraphs: 1 })}>
+        + Note
+      </Button>
+      <Button
+        onClick={() => onNewNotesRequested({ count: 1, paragraphs: 1000 })}
+      >
+        + Huge note
+      </Button>
+      <Button
+        onClick={() => onNewNotesRequested({ count: 100, paragraphs: 1 })}
+      >
+        + 100 notes
+      </Button>
+      <Button onClick={() => onDeleteAllRequested()}>Delete all</Button>
+    </ButtonGroup>
+  );
+}
+
+const NoteControlsMemoized = memo(NoteControls);
 
 function NotesList({
   notes,
@@ -99,29 +128,44 @@ function NotesList({
             />
           ))}
       </div>
-
-      <div className="notes-list__controls">
-        <ButtonGroup size="small">
-          <Button
-            onClick={() => onNewNotesRequested({ count: 1, paragraphs: 1 })}
-          >
-            + Note
-          </Button>
-          <Button
-            onClick={() => onNewNotesRequested({ count: 1, paragraphs: 1000 })}
-          >
-            + Huge note
-          </Button>
-          <Button
-            onClick={() => onNewNotesRequested({ count: 100, paragraphs: 1 })}
-          >
-            + 100 notes
-          </Button>
-          <Button onClick={() => onDeleteAllRequested()}>Delete all</Button>
-        </ButtonGroup>
-      </div>
+      <NoteControlsMemoized
+        onNewNotesRequested={onNewNotesRequested}
+        onDeleteAllRequested={onDeleteAllRequested}
+      />
+      <div className="notes-list__controls"></div>
     </div>
   );
+}
+
+function useWhyDidYouUpdate(name, props) {
+  // Get a mutable ref object where we can store props ...
+  // ... for comparison next time this hook runs.
+  const previousProps = useRef();
+  useEffect(() => {
+    if (previousProps.current) {
+      // Get all keys from previous and current props
+      const allKeys = Object.keys({ ...previousProps.current, ...props });
+      // Use this object to keep track of changed props
+      const changesObj = {};
+      // Iterate through keys
+      allKeys.forEach((key) => {
+        // If previous is different from current
+        if (previousProps.current[key] !== props[key]) {
+          // Add to changesObj
+          changesObj[key] = {
+            from: previousProps.current[key],
+            to: props[key],
+          };
+        }
+      });
+      // If changesObj not empty then output to console
+      if (Object.keys(changesObj).length) {
+        console.log("[why-did-you-update]", name, changesObj);
+      }
+    }
+    // Finally update previousProps with current props for next hook call
+    previousProps.current = props;
+  });
 }
 
 export default NotesList;
