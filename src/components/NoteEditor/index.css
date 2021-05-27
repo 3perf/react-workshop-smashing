@@ -1,0 +1,30 @@
+.note-editor__textarea {
+  width: 100%;
+}
+
+.note-editor__toolbar {
+  margin-bottom: 16px;
+}
+
+.note-editor__toolbar-inner {
+  display: flex;
+  align-items: flex-end;
+}
+
+.note-editor__datetime {
+  margin-left: 16px !important;
+}
+
+.note-editor__hint {
+  margin-top: 16px;
+}
+
+.note-editor__theme-switcher {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.note-editor__theme-switcher-label {
+  margin-right: 4px;
+}
