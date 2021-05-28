@@ -1,0 +1,49 @@
+.note-view {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.note-view__control {
+  display: flex;
+  gap: 16px;
+
+  background: #fffae0;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.note-view__theme-switcher {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.note-view__view {
+  flex: 1 0 0;
+  min-height: 0;
+
+  overflow: auto;
+}
+
+.note-view__view :first-child {
+  margin-top: 0;
+}
+
+.note-view__view h1 {
+  color: var(--header-color);
+  font-weight: 900;
+}
+
+.note-view__comment-wrapper {
+  padding: 12px;
+}
+
+.note-view__textarea-wrapper {
+  border: 1px solid #efefef;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
