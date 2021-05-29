@@ -2,16 +2,29 @@ import { Button, Popover } from "@material-ui/core";
 import Brightness2Icon from "@material-ui/icons/Brightness2";
 import WbSunnyIcon from "@material-ui/icons/WbSunny";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import CodeMirror from "codemirror";
 import "codemirror/lib/codemirror.css";
-import "codemirror/mode/gfm/gfm";
 import { useContext, useMemo, useState } from "react";
-import { SketchPicker } from "react-color";
 import ReactMarkdown from "react-markdown";
 import gfm from "remark-gfm";
 import fakeApi from "../../utils/fakeApi";
 import { ThemeContext } from "../ThemeContext";
 import "./index.css";
+
+function importCodeMirror() {
+  return Promise.all([
+    import(/* webpackChunkName: "codemirror" */ "codemirror"),
+    import(
+      /* webpackChunkName: "codemirror", webpackPrefetch: true */ "codemirror/mode/gfm/gfm"
+    ),
+  ]).then(([codemirror]) => codemirror);
+}
+
+// function importColorPicket() {
+//   return import(/* webpackMode: "eager" */ "react-color");
+// }
+
+// React.lazy()
+// loadable-component
 
 function MarkAsRead() {
   const [readStatus, setReadStatus] = useState("unread");
@@ -66,6 +79,8 @@ function ColorPicker({ color, onColorChange }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const isPopoverVisible = Boolean(anchorEl);
 
+  const { SketchPicker } = require("react-color");
+
   return (
     <>
       <Button
@@ -97,8 +112,13 @@ function ColorPicker({ color, onColorChange }) {
 }
 
 function CommentField() {
+  console.time("call 1");
   const [anchorEl, setAnchorEl] = useState(null);
+  console.timeEnd("call 1");
+
+  console.time("call 2");
   const isPopoverVisible = Boolean(anchorEl);
+  console.timeEnd("call 2");
 
   return (
     <>
@@ -124,8 +144,9 @@ function CommentField() {
         <div className="note-view__comment-wrapper">
           <div className="note-view__textarea-wrapper">
             <textarea
-              ref={(el) => {
+              ref={async (el) => {
                 if (el) {
+                  const CodeMirror = await importCodeMirror();
                   const editor = CodeMirror.fromTextArea(el, {
                     mode: "gfm",
                     lineWrapping: true,
@@ -165,7 +186,15 @@ export default function NoteView({ text }) {
       >
         {useMemo(
           () => (
+            // if (element.props.dangerouslySetInnerHTML.__html) {
+            //   div.innerHTML = ''
+            // }
+            // <div
+            //       dangerouslySetInnerHTML={{ __html: "" }}
+            //       suppressHydrationWarning={true}
+            // >
             <ReactMarkdown remarkPlugins={[gfm]}>{text}</ReactMarkdown>
+            // </div>
           ),
           [text]
         )}

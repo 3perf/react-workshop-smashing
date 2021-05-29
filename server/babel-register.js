@@ -1,5 +1,13 @@
 console.log("Starting the server...");
 
+global.navigator = {
+  userAgent: "",
+};
+
+global.window = global;
+
+global.document = {};
+
 // The SSR config is based on https://javascript.plainenglish.io/a-hands-on-guide-for-a-server-side-rendering-react-app-dd1efa3ec0d8
 require("@babel/register")({
   presets: [

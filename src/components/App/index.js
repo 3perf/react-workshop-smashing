@@ -1,5 +1,5 @@
 import "./index.css";
-import { StrictMode, useState } from "react";
+import { StrictMode, useMemo, useState } from "react";
 import { Avatar } from "@material-ui/core";
 import { AvatarGroup } from "@material-ui/lab";
 import { Provider } from "react-redux";
@@ -12,6 +12,7 @@ import store from "../../store";
 import { useEffect } from "react";
 import fakeApi from "../../utils/fakeApi";
 import { browser } from "../../utils/userAgent";
+import UAParser from "ua-parser-js";
 
 function Authors() {
   const activeIn2021 = useSelector((state) =>
@@ -66,8 +67,14 @@ function App() {
 
   // Send data to analytics
   useEffect(() => {
-    fakeApi.logVisit({ browser });
+    const userAgent = UAParser();
+    fakeApi.logVisit({ browser: userAgent.browser });
   });
+
+  const value = useMemo(() => {
+    console.log("useMemo", window.dependency);
+    return { a: window.dependency };
+  }, [window.dependency]);
 
   return (
     <StrictMode>
