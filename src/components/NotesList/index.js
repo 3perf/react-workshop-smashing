@@ -1,8 +1,10 @@
 import "./index.css";
+import * as Sentry from "@sentry/react";
 import ReactMarkdown from "react-markdown";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import gfm from "remark-gfm";
 import { format } from "date-fns";
+import transactions from "../../utils/transactions";
 
 function generateNoteHeader(text) {
   const firstLine = text
@@ -57,6 +59,28 @@ export default function NotesList({
   const [filter, setFilter] = useState("");
   const notesListRef = useRef();
 
+  useEffect(() => {
+    // const endTime = new Date().getTime();
+    // console.log("it took " + (endTime - window.noteActivatedTime) + " ms");
+    // performance.mark("noteslist rendered");
+    console.timeEnd("switching between notes");
+    if (transactions["noteClick"]) {
+      // performance.measure(
+      //   "note click",
+      //   "started switching between notes",
+      //   "noteslist rendered"
+      // );
+      // console.log(performance.getEntries());
+      transactions["noteClick"].finish();
+      delete transactions["noteClick"];
+    }
+
+    if (transactions["newNotes"]) {
+      transactions["newNotes"].finish();
+      delete transactions["newNotes"];
+    }
+  });
+
   return (
     <div className="notes-list" style={{ position: "relative" }}>
       <div className="notes-list__filter">
@@ -86,6 +110,16 @@ export default function NotesList({
               key={id}
               isActive={activeNoteId === id}
               onNoteActivated={() => {
+                // window.noteActivatedTime = new Date().getTime();
+                // performance.mark("started switching between notes");
+                console.time("switching between notes");
+                transactions["noteClick"] = Sentry.startTransaction({
+                  op: "runtimePerf_day5",
+                  name: "Note click",
+                  tags: {
+                    isLongNote: text.length > 200,
+                  },
+                });
                 onNoteActivated(id);
               }}
               text={text}
@@ -111,7 +145,23 @@ export default function NotesList({
 
         <button
           className="notes-list__button notes-list__control"
-          onClick={() => onNewNotesRequested({ count: 100, paragraphs: 1 })}
+          onClick={() => {
+            transactions["newNotes"] = Sentry.startTransaction({
+              op: "runtimePerf_day5",
+              name: "Create new notes",
+              tags: {
+                count: 100,
+                paragraphs: 1,
+              },
+            });
+
+            const span = transactions["newNotes"].startChild({
+              op: "runtimePerf_day5",
+              description: "Calling `onNewNotesRequested`",
+            });
+            onNewNotesRequested({ count: 100, paragraphs: 1 });
+            span.finish();
+          }}
         >
           + 100 notes
         </button>
